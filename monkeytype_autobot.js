@@ -1,7 +1,7 @@
 // MonkeyType Auto Typer Bookmarklet
 javascript:(function() {
     // Version number
-    const VERSION = '1.2.3';
+    const VERSION = '1.2.4';
     
     // Improved website detection
     const currentHost = window.location.hostname.toLowerCase();
@@ -19,32 +19,19 @@ javascript:(function() {
 
     // Function to get the current word
     function getCurrentWord() {
-        // Try different selectors that MonkeyType might use
-        const selectors = [
-            '#words .word.active',
-            '.word.active',
-            '.word.active span',
-            '.word.active .letter',
-            '.word.active .char',
-            '.word.active > span'
-        ];
-
-        for (const selector of selectors) {
-            const activeWord = document.querySelector(selector);
-            console.log('Trying selector:', selector, 'Found:', activeWord);
-            
-            if (activeWord) {
-                // Get all letters in the word
-                const letters = Array.from(activeWord.querySelectorAll('span, .letter, .char'))
-                    .map(letter => letter.textContent)
-                    .join('');
-                console.log('Found word:', letters);
-                return letters;
-            }
+        const activeWord = document.querySelector('div.word.active');
+        if (!activeWord) {
+            console.log('No active word found');
+            return '';
         }
-
-        console.log('No active word found with any selector');
-        return '';
+        
+        // Get all letters in the word
+        const letters = Array.from(activeWord.querySelectorAll('letter'))
+            .map(letter => letter.textContent)
+            .join('');
+        
+        console.log('Found word:', letters);
+        return letters;
     }
 
     // Function to simulate typing with accuracy
@@ -56,49 +43,26 @@ javascript:(function() {
             // Make a random mistake
             const randomChar = String.fromCharCode(97 + Math.floor(Math.random() * 26));
             console.log('Making mistake:', randomChar);
-            const event = new KeyboardEvent('keydown', {
-                key: randomChar,
-                code: 'Key' + randomChar.toUpperCase(),
-                keyCode: randomChar.charCodeAt(0),
-                which: randomChar.charCodeAt(0),
-                bubbles: true,
-                cancelable: true,
-                composed: true,
-                isTrusted: true
-            });
-            document.dispatchEvent(event);
+            const input = document.querySelector('#wordsInput');
+            if (input) {
+                input.value += randomChar;
+                input.dispatchEvent(new Event('input'));
+            }
             return;
         }
 
         // Type each character in the word
-        for (const char of word) {
-            console.log('Typing character:', char);
-            const event = new KeyboardEvent('keydown', {
-                key: char,
-                code: 'Key' + char.toUpperCase(),
-                keyCode: char.charCodeAt(0),
-                which: char.charCodeAt(0),
-                bubbles: true,
-                cancelable: true,
-                composed: true,
-                isTrusted: true
-            });
-            document.dispatchEvent(event);
+        const input = document.querySelector('#wordsInput');
+        if (input) {
+            input.value += word;
+            input.dispatchEvent(new Event('input'));
+            
+            // Add space after word
+            setTimeout(() => {
+                input.value += ' ';
+                input.dispatchEvent(new Event('input'));
+            }, 50);
         }
-        
-        // Add space after word
-        console.log('Adding space');
-        const spaceEvent = new KeyboardEvent('keydown', {
-            key: ' ',
-            code: 'Space',
-            keyCode: 32,
-            which: 32,
-            bubbles: true,
-            cancelable: true,
-            composed: true,
-            isTrusted: true
-        });
-        document.dispatchEvent(spaceEvent);
     }
 
     // Main typing loop
