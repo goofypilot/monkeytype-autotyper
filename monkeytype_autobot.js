@@ -15,11 +15,25 @@ javascript:(function() {
 
     // Function to get the current word
     function getCurrentWord() {
-        const activeWord = document.querySelector('.word.active');
-        if (!activeWord) return '';
-        return Array.from(activeWord.children)
-            .map(letter => letter.textContent)
-            .join('');
+        // Try different selectors to find the active word
+        const selectors = [
+            '.word.active',
+            '.word.active span',
+            '#words .word.active',
+            '#words .word.active span'
+        ];
+        
+        for (const selector of selectors) {
+            const element = document.querySelector(selector);
+            if (element) {
+                // If it's a span, get its parent
+                const wordElement = element.tagName === 'SPAN' ? element.parentElement : element;
+                return Array.from(wordElement.children)
+                    .map(letter => letter.textContent)
+                    .join('');
+            }
+        }
+        return '';
     }
 
     // Function to simulate typing with accuracy
@@ -30,17 +44,30 @@ javascript:(function() {
             const randomChar = String.fromCharCode(97 + Math.floor(Math.random() * 26));
             const event = new KeyboardEvent('keydown', {
                 key: randomChar,
-                bubbles: true
+                bubbles: true,
+                cancelable: true
             });
             document.dispatchEvent(event);
             return;
         }
 
-        const event = new KeyboardEvent('keydown', {
-            key: word,
-            bubbles: true
+        // Type each character in the word
+        for (const char of word) {
+            const event = new KeyboardEvent('keydown', {
+                key: char,
+                bubbles: true,
+                cancelable: true
+            });
+            document.dispatchEvent(event);
+        }
+        
+        // Add space after word
+        const spaceEvent = new KeyboardEvent('keydown', {
+            key: ' ',
+            bubbles: true,
+            cancelable: true
         });
-        document.dispatchEvent(event);
+        document.dispatchEvent(spaceEvent);
     }
 
     // Main typing loop
@@ -51,12 +78,7 @@ javascript:(function() {
         const typingInterval = setInterval(() => {
             const currentWord = getCurrentWord();
             if (currentWord) {
-                // Type each character in the word
-                for (const char of currentWord) {
-                    typeWord(char);
-                }
-                // Add space after word
-                typeWord(' ');
+                typeWord(currentWord);
             }
         }, delay);
 
