@@ -1,5 +1,8 @@
 // MonkeyType Auto Typer Bookmarklet
 javascript:(function() {
+    // Version number
+    const VERSION = '1.2.0';
+
     // Check if we're on monkeytype.com
     if (!window.location.hostname.includes('monkeytype.com')) {
         alert('Please run this bookmarklet on monkeytype.com');
@@ -108,7 +111,7 @@ javascript:(function() {
 
     // Add settings controls
     settingsMenu.innerHTML = `
-        <h2 style="margin-top: 0; color: #e2b714;">MonkeyType Bot Settings</h2>
+        <h2 style="margin-top: 0; color: #e2b714;">MonkeyType Bot v${VERSION}</h2>
         <div style="margin-bottom: 15px;">
             <label style="display: block; margin-bottom: 5px;">Accuracy (%):</label>
             <input type="range" min="0" max="100" value="100" id="accuracySlider" style="width: 200px;">
