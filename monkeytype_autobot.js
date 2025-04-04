@@ -15,20 +15,11 @@ javascript:(function() {
 
     // Function to get the current word
     function getCurrentWord() {
-        // Try different selectors to find the active word
-        const selectors = [
-            '.word.active',
-            '.word.active span',
-            '#words .word.active',
-            '#words .word.active span'
-        ];
-        
-        for (const selector of selectors) {
-            const element = document.querySelector(selector);
-            if (element) {
-                // If it's a span, get its parent
-                const wordElement = element.tagName === 'SPAN' ? element.parentElement : element;
-                return Array.from(wordElement.children)
+        // Get all words
+        const words = document.querySelectorAll('#words .word');
+        for (const word of words) {
+            if (word.classList.contains('active')) {
+                return Array.from(word.children)
                     .map(letter => letter.textContent)
                     .join('');
             }
@@ -44,6 +35,9 @@ javascript:(function() {
             const randomChar = String.fromCharCode(97 + Math.floor(Math.random() * 26));
             const event = new KeyboardEvent('keydown', {
                 key: randomChar,
+                code: 'Key' + randomChar.toUpperCase(),
+                keyCode: randomChar.charCodeAt(0),
+                which: randomChar.charCodeAt(0),
                 bubbles: true,
                 cancelable: true
             });
@@ -55,6 +49,9 @@ javascript:(function() {
         for (const char of word) {
             const event = new KeyboardEvent('keydown', {
                 key: char,
+                code: 'Key' + char.toUpperCase(),
+                keyCode: char.charCodeAt(0),
+                which: char.charCodeAt(0),
                 bubbles: true,
                 cancelable: true
             });
@@ -64,6 +61,9 @@ javascript:(function() {
         // Add space after word
         const spaceEvent = new KeyboardEvent('keydown', {
             key: ' ',
+            code: 'Space',
+            keyCode: 32,
+            which: 32,
             bubbles: true,
             cancelable: true
         });
