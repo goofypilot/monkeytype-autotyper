@@ -15,59 +15,30 @@ javascript:(function() {
 
     // Function to get the current word
     function getCurrentWord() {
-        // Get all words
-        const words = document.querySelectorAll('#words .word');
-        for (const word of words) {
-            if (word.classList.contains('active')) {
-                return Array.from(word.children)
-                    .map(letter => letter.textContent)
-                    .join('');
-            }
-        }
-        return '';
+        const activeWord = document.querySelector('#words .word.active');
+        if (!activeWord) return '';
+        return Array.from(activeWord.children)
+            .map(letter => letter.textContent)
+            .join('');
     }
 
     // Function to simulate typing with accuracy
     function typeWord(word) {
+        const input = document.querySelector('#wordsInput');
+        if (!input) return;
+
         // Calculate if we should make a mistake based on accuracy
         if (Math.random() * 100 > settings.accuracy) {
             // Make a random mistake
             const randomChar = String.fromCharCode(97 + Math.floor(Math.random() * 26));
-            const event = new KeyboardEvent('keydown', {
-                key: randomChar,
-                code: 'Key' + randomChar.toUpperCase(),
-                keyCode: randomChar.charCodeAt(0),
-                which: randomChar.charCodeAt(0),
-                bubbles: true,
-                cancelable: true
-            });
-            document.dispatchEvent(event);
+            input.value += randomChar;
+            input.dispatchEvent(new Event('input', { bubbles: true }));
             return;
         }
 
-        // Type each character in the word
-        for (const char of word) {
-            const event = new KeyboardEvent('keydown', {
-                key: char,
-                code: 'Key' + char.toUpperCase(),
-                keyCode: char.charCodeAt(0),
-                which: char.charCodeAt(0),
-                bubbles: true,
-                cancelable: true
-            });
-            document.dispatchEvent(event);
-        }
-        
-        // Add space after word
-        const spaceEvent = new KeyboardEvent('keydown', {
-            key: ' ',
-            code: 'Space',
-            keyCode: 32,
-            which: 32,
-            bubbles: true,
-            cancelable: true
-        });
-        document.dispatchEvent(spaceEvent);
+        // Type the word
+        input.value += word + ' ';
+        input.dispatchEvent(new Event('input', { bubbles: true }));
     }
 
     // Main typing loop
