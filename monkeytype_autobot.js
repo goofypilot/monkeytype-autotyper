@@ -1,7 +1,7 @@
 // MonkeyType Auto Typer Bookmarklet
 javascript:(function() {
     // Version number
-    const VERSION = '1.2.1';
+    const VERSION = '1.2.2';
     
     // Improved website detection
     const currentHost = window.location.hostname.toLowerCase();
@@ -20,18 +20,27 @@ javascript:(function() {
     // Function to get the current word
     function getCurrentWord() {
         const activeWord = document.querySelector('#words .word.active');
-        if (!activeWord) return '';
-        return Array.from(activeWord.children)
+        console.log('Active word element:', activeWord);
+        if (!activeWord) {
+            console.log('No active word found');
+            return '';
+        }
+        const word = Array.from(activeWord.children)
             .map(letter => letter.textContent)
             .join('');
+        console.log('Current word:', word);
+        return word;
     }
 
     // Function to simulate typing with accuracy
     function typeWord(word) {
+        console.log('Typing word:', word);
+        
         // Calculate if we should make a mistake based on accuracy
         if (Math.random() * 100 > settings.accuracy) {
             // Make a random mistake
             const randomChar = String.fromCharCode(97 + Math.floor(Math.random() * 26));
+            console.log('Making mistake:', randomChar);
             const event = new KeyboardEvent('keydown', {
                 key: randomChar,
                 code: 'Key' + randomChar.toUpperCase(),
@@ -48,6 +57,7 @@ javascript:(function() {
 
         // Type each character in the word
         for (const char of word) {
+            console.log('Typing character:', char);
             const event = new KeyboardEvent('keydown', {
                 key: char,
                 code: 'Key' + char.toUpperCase(),
@@ -62,6 +72,7 @@ javascript:(function() {
         }
         
         // Add space after word
+        console.log('Adding space');
         const spaceEvent = new KeyboardEvent('keydown', {
             key: ' ',
             code: 'Space',
@@ -77,6 +88,7 @@ javascript:(function() {
 
     // Main typing loop
     function startTyping() {
+        console.log('Starting typing with settings:', settings);
         // Calculate delay based on WPM
         const delay = 60000 / settings.wpm; // milliseconds per word
         
@@ -91,6 +103,7 @@ javascript:(function() {
         setTimeout(() => {
             clearInterval(typingInterval);
             settingsMenu.style.display = 'block';
+            console.log('Typing session ended');
         }, settings.duration * 1000);
     }
 
@@ -162,10 +175,12 @@ javascript:(function() {
     });
 
     startButton.addEventListener('click', () => {
+        console.log('Start button clicked');
         settingsMenu.style.display = 'none';
         startTyping();
     });
 
     // Add menu to page
     document.body.appendChild(settingsMenu);
+    console.log('Settings menu added to page');
 })(); 
