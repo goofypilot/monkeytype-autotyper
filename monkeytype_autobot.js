@@ -1,11 +1,12 @@
 // MonkeyType Auto Typer Bookmarklet
 javascript:(function() {
     // Version number
-    const VERSION = '1.2.0';
-
-    // Check if we're on monkeytype.com
-    if (!window.location.hostname.includes('monkeytype.com')) {
-        alert('Please run this bookmarklet on monkeytype.com');
+    const VERSION = '1.2.1';
+    
+    // Improved website detection
+    const currentHost = window.location.hostname.toLowerCase();
+    if (!currentHost.includes('monkeytype.com')) {
+        alert(`This bookmarklet only works on monkeytype.com\nCurrent website: ${currentHost}\nVersion: ${VERSION}`);
         return;
     }
 
