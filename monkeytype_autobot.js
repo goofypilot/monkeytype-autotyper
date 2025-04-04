@@ -1,7 +1,7 @@
 // MonkeyType Auto Typer Bookmarklet
 javascript:(function() {
     // Version number
-    const VERSION = '1.2.2';
+    const VERSION = '1.2.3';
     
     // Improved website detection
     const currentHost = window.location.hostname.toLowerCase();
@@ -19,17 +19,32 @@ javascript:(function() {
 
     // Function to get the current word
     function getCurrentWord() {
-        const activeWord = document.querySelector('#words .word.active');
-        console.log('Active word element:', activeWord);
-        if (!activeWord) {
-            console.log('No active word found');
-            return '';
+        // Try different selectors that MonkeyType might use
+        const selectors = [
+            '#words .word.active',
+            '.word.active',
+            '.word.active span',
+            '.word.active .letter',
+            '.word.active .char',
+            '.word.active > span'
+        ];
+
+        for (const selector of selectors) {
+            const activeWord = document.querySelector(selector);
+            console.log('Trying selector:', selector, 'Found:', activeWord);
+            
+            if (activeWord) {
+                // Get all letters in the word
+                const letters = Array.from(activeWord.querySelectorAll('span, .letter, .char'))
+                    .map(letter => letter.textContent)
+                    .join('');
+                console.log('Found word:', letters);
+                return letters;
+            }
         }
-        const word = Array.from(activeWord.children)
-            .map(letter => letter.textContent)
-            .join('');
-        console.log('Current word:', word);
-        return word;
+
+        console.log('No active word found with any selector');
+        return '';
     }
 
     // Function to simulate typing with accuracy
