@@ -1,7 +1,7 @@
 // MonkeyType Auto Typer Bookmarklet
 javascript:(function() {
     // Version number
-    const VERSION = '1.2.5';
+    const VERSION = '1.2.7';
     
     // Improved website detection
     const currentHost = window.location.hostname.toLowerCase();
@@ -47,65 +47,61 @@ javascript:(function() {
             return;
         }
 
-        // Type each character in the word
-        for (const char of word) {
-            simulateKeyPress(char);
+        // Type each character in the word with a small delay
+        let index = 0;
+        function typeNextChar() {
+            if (index < word.length) {
+                simulateKeyPress(word[index]);
+                index++;
+                setTimeout(typeNextChar, 50); // 50ms delay between characters
+            } else {
+                // Add space after word
+                setTimeout(() => {
+                    simulateKeyPress(' ');
+                }, 50);
+            }
         }
-        
-        // Add space after word
-        setTimeout(() => {
-            simulateKeyPress(' ');
-        }, 50);
+        typeNextChar();
     }
 
     // Function to simulate a key press
     function simulateKeyPress(char) {
-        const keyCode = char.charCodeAt(0);
-        const keyDownEvent = new KeyboardEvent('keydown', {
+        console.log('Simulating key press:', char);
+        
+        // Create the key event
+        const event = new KeyboardEvent('keypress', {
             key: char,
             code: char === ' ' ? 'Space' : 'Key' + char.toUpperCase(),
-            keyCode: keyCode,
-            which: keyCode,
+            keyCode: char.charCodeAt(0),
+            which: char.charCodeAt(0),
             bubbles: true,
             cancelable: true,
-            composed: true
+            composed: true,
+            repeat: false,
+            isComposing: false,
+            charCode: char.charCodeAt(0)
         });
 
-        const keyPressEvent = new KeyboardEvent('keypress', {
-            key: char,
-            code: char === ' ' ? 'Space' : 'Key' + char.toUpperCase(),
-            keyCode: keyCode,
-            which: keyCode,
-            bubbles: true,
-            cancelable: true,
-            composed: true
-        });
+        // Try different targets for the event
+        const targets = [
+            document.querySelector('#wordsInput'),
+            document.querySelector('input[type="text"]'),
+            document.querySelector('.input'),
+            document.activeElement,
+            document.body,
+            document
+        ];
 
-        const keyUpEvent = new KeyboardEvent('keyup', {
-            key: char,
-            code: char === ' ' ? 'Space' : 'Key' + char.toUpperCase(),
-            keyCode: keyCode,
-            which: keyCode,
-            bubbles: true,
-            cancelable: true,
-            composed: true
-        });
-
-        const input = document.querySelector('#wordsInput');
-        if (input) {
-            input.focus();
-            input.dispatchEvent(keyDownEvent);
-            input.dispatchEvent(keyPressEvent);
-            input.dispatchEvent(keyUpEvent);
-            
-            // Also update the input value
-            input.value += char;
-            input.dispatchEvent(new Event('input', { bubbles: true }));
-        } else {
-            // If no input field found, try dispatching on document
-            document.dispatchEvent(keyDownEvent);
-            document.dispatchEvent(keyPressEvent);
-            document.dispatchEvent(keyUpEvent);
+        // Dispatch the event to all possible targets
+        for (const target of targets) {
+            if (target) {
+                console.log('Dispatching to target:', target);
+                target.dispatchEvent(event);
+                if (target instanceof HTMLInputElement) {
+                    target.value += char;
+                    target.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+            }
         }
     }
 
