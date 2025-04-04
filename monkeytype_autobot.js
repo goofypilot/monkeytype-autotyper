@@ -1,7 +1,7 @@
 // MonkeyType Auto Typer Bookmarklet
 javascript:(function() {
     // Version number
-    const VERSION = '1.2.4';
+    const VERSION = '1.2.5';
     
     // Improved website detection
     const currentHost = window.location.hostname.toLowerCase();
@@ -43,25 +43,69 @@ javascript:(function() {
             // Make a random mistake
             const randomChar = String.fromCharCode(97 + Math.floor(Math.random() * 26));
             console.log('Making mistake:', randomChar);
-            const input = document.querySelector('#wordsInput');
-            if (input) {
-                input.value += randomChar;
-                input.dispatchEvent(new Event('input'));
-            }
+            simulateKeyPress(randomChar);
             return;
         }
 
         // Type each character in the word
+        for (const char of word) {
+            simulateKeyPress(char);
+        }
+        
+        // Add space after word
+        setTimeout(() => {
+            simulateKeyPress(' ');
+        }, 50);
+    }
+
+    // Function to simulate a key press
+    function simulateKeyPress(char) {
+        const keyCode = char.charCodeAt(0);
+        const keyDownEvent = new KeyboardEvent('keydown', {
+            key: char,
+            code: char === ' ' ? 'Space' : 'Key' + char.toUpperCase(),
+            keyCode: keyCode,
+            which: keyCode,
+            bubbles: true,
+            cancelable: true,
+            composed: true
+        });
+
+        const keyPressEvent = new KeyboardEvent('keypress', {
+            key: char,
+            code: char === ' ' ? 'Space' : 'Key' + char.toUpperCase(),
+            keyCode: keyCode,
+            which: keyCode,
+            bubbles: true,
+            cancelable: true,
+            composed: true
+        });
+
+        const keyUpEvent = new KeyboardEvent('keyup', {
+            key: char,
+            code: char === ' ' ? 'Space' : 'Key' + char.toUpperCase(),
+            keyCode: keyCode,
+            which: keyCode,
+            bubbles: true,
+            cancelable: true,
+            composed: true
+        });
+
         const input = document.querySelector('#wordsInput');
         if (input) {
-            input.value += word;
-            input.dispatchEvent(new Event('input'));
+            input.focus();
+            input.dispatchEvent(keyDownEvent);
+            input.dispatchEvent(keyPressEvent);
+            input.dispatchEvent(keyUpEvent);
             
-            // Add space after word
-            setTimeout(() => {
-                input.value += ' ';
-                input.dispatchEvent(new Event('input'));
-            }, 50);
+            // Also update the input value
+            input.value += char;
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+        } else {
+            // If no input field found, try dispatching on document
+            document.dispatchEvent(keyDownEvent);
+            document.dispatchEvent(keyPressEvent);
+            document.dispatchEvent(keyUpEvent);
         }
     }
 
